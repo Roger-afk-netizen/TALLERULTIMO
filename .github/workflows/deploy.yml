@@ -1,12 +1,12 @@
-name: Deploy HTML Website
+name: Blue-Green Deployment
 
 on:
   push:
     branches:
-      - main
+      - blue
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,16 +16,32 @@ jobs:
     - name: Setup Node.js environment
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
+        node-version: '22'
 
     - name: Install dependencies
       run: npm install
 
-    - name: Build the website
+    - name: Build project
       run: npm run build
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
+    - name: Run tests
+      run: npm test
+
+    - name: Deploy to server (example)
+      if: success()
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+        SERVER_IP: ${{ secrets.SERVER_IP }}
+      run: |
+        ssh -i $SSH_PRIVATE_KEY $SERVER_USER@$SERVER_IP 'mkdir -p /var/www/blue'
+        scp -i $SSH_PRIVATE_KEY -r ./build/* $SERVER_USER@$SERVER_IP:/var/www/blue
+
+    - name: Notify successful deployment
+      if: success()
+      run: echo "La versión blue ha sido desplegada y está lista para ser promovida!"
+
+    - name: Rollback to green
+      if: failure()
+      run: echo "Las pruebas fallaron. Rollback a la versión green iniciando..."
+      
