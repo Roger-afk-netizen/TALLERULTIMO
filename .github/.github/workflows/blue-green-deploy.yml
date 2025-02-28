@@ -28,6 +28,7 @@ jobs:
       run: npm test
 
     - name: Deploy to server (example)
+      if: success()
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER_USER: ${{ secrets.SERVER_USER }}
@@ -36,5 +37,11 @@ jobs:
         ssh -i $SSH_PRIVATE_KEY $SERVER_USER@$SERVER_IP 'mkdir -p /var/www/blue'
         scp -i $SSH_PRIVATE_KEY -r ./build/* $SERVER_USER@$SERVER_IP:/var/www/blue
 
-    - name: Notify successful deployment (example)
-      run: echo "Blue version deployed successfully!"
+    - name: Notify successful deployment
+      if: success()
+      run: echo "La versión blue ha sido desplegada y está lista para ser promovida!"
+
+    - name: Rollback to green
+      if: failure()
+      run: echo "Las pruebas fallaron. Rollback a la versión green iniciando..."
+      
