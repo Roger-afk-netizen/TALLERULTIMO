@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - blue
-      - green
 
 jobs:
   build:
