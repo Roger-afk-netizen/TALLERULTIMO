@@ -3,59 +3,56 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - green
-    
+      - blue
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: |
-        npm install
-        # Añade aquí otros comandos de instalación según tu proyecto
+      - name: Install dependencies
+        run: npm install
 
-    - name: Build the site
-      run: npm run build
+      - name: Build project
+        run: npm run build
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build
+      - name: Deploy to GitHub Pages
+        run: |
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
+          git checkout green
+          cp -r build/* .
+          git add .
+          git commit -m "Deploy from blue to green"
+          git push origin green
 
   test:
     runs-on: ubuntu-latest
-
+    needs: build
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: green
 
-    - name: Run tests
-      run: |
-        curl -I http://localhost:4000
-        # Añade aquí otros comandos de testing según tus necesidades
+      - name: Run tests
+        run: |
+          # Aquí puedes agregar tus comandos de prueba, por ejemplo:
+          curl -Is http://yourusername.github.io/your-repo-name | head -n 1
 
   rollback:
     runs-on: ubuntu-latest
     needs: test
     if: failure()
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: green
 
-    - name: Revert to green branch
-      run: |
-        git checkout green
-        git merge blue --abort  # Abort the merge if tests fail
-        git push origin green
-
-    - name: Deploy green branch
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build
+      - name: Rollback to previous version
+        run: |
+          git reset --hard HEAD~1
+          git push origin green --force
