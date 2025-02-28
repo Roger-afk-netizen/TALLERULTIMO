@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - blue
-      - green
 
 jobs:
   deploy:
@@ -45,4 +44,4 @@ jobs:
     - name: Rollback to green
       if: failure()
       run: echo "Las pruebas fallaron. Rollback a la versión green iniciando..."
-      # Aquí puedes agregar comandos adicionales para revertir cambios si es necesario.
+     
