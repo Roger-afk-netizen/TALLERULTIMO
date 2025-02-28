@@ -1,5 +1,14 @@
 {
+  "name": "tu-proyecto",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+    
+  },
+  "dependencies": {
+   
+  },
   "devDependencies": {
-    "jest": "^29.7.0"
+    
   }
 }
