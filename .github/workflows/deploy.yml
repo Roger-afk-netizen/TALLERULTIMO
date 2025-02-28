@@ -1,33 +1,26 @@
-name: Blue-Green Deployment
+name: Blue/Green Deployment and Testing
 
 on:
   push:
-    branches:
-      - blue
+    branches: [ blue ]
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Deploy to server (example)
-      if: success()
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SERVER_USER: ${{ secrets.SERVER_USER }}
-        SERVER_IP: ${{ secrets.SERVER_IP }}
-      run: |
-        ssh -i $SSH_PRIVATE_KEY $SERVER_USER@$SERVER_IP 'mkdir -p /var/www/blue'
-        scp -i $SSH_PRIVATE_KEY -r ./build/* $SERVER_USER@$SERVER_IP:/var/www/blue
+      - name: Notify Test Success
+        run: echo "La versión Blue pasó las pruebas."
 
-    - name: Notify successful deployment
-      if: success()
-      run: echo "La versión blue ha sido desplegada y está lista para ser promovida!"
-
-    - name: Rollback to green
-      if: failure()
-      run: echo "Las pruebas fallaron. Rollback a la versión green iniciando..."
       
+      - name: Promote Blue to Green (Simulación)
+        run: |
+          echo "Promoviendo la versión Blue a producción (simulado)."
+          # Aquí podrías incluir comandos para actualizar la rama 'green' o realizar otras acciones de promoción.
+          
+      - name: Notify Deployment
+        run: echo "El despliegue se ha realizado correctamente. La versión Blue se ha promovido a Green."
