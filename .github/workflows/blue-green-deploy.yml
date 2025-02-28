@@ -1,0 +1,38 @@
+name: Blue-Green Deploy
+
+on:
+  push:
+    branches:
+      - blue
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test
+
+    - name: Validate version
+      run: |
+        curl -s http://localhost:3000 | grep "Versión Blue"
+      continue-on-error: true
+
+    - name: Notify success
+      if: success()
+      run: echo "La versión blue está lista para ser promovida"
+
+    - name: Rollback to green
+      if: failure()
+      run: git push origin green --force
