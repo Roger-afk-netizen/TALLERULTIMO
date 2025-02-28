@@ -39,7 +39,6 @@ jobs:
 
       - name: Run tests
         run: |
-          # Aquí puedes agregar tus comandos de prueba, por ejemplo:
           curl -Is http://yourusername.github.io/your-repo-name | head -n 1
 
   rollback:
@@ -51,6 +50,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: green
+
+      - name: Clean workspace
+        run: git reset --hard
 
       - name: Rollback to previous version
         run: |
